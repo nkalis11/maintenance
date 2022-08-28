@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  userRole  UserRole[]
+  @@map(name: "users")
+}
+model UserRole {
+  id        String   @id @default(cuid())
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    String?
+  role      Role?    @relation(fields: [roleId], references: [id])
+  roleId    String?
+}
+model Role {
+  id        String    @id @default(cuid())
+  title     String?
+  createdAt DateTime  @default(now())
+  per       Permissions[]
+  user      UserRole[]
+}
+model Permissions {
+  id        String    @id @default(cuid())
+  title     String?
+  createdAt DateTime  @default(now())
+  role      Role?     @relation(fields: [roleId], references: [id])
+  roleId    String?
+}
+
+//Tables for Maintenance and Periodicity
+model Periodicity {
+  id      String  @id @default(cuid())
+  tittle  String?
+  desc    String?
+  maint   Maintenance[]
+}
+model Maintenance {
+  id      String  @id @default(cuid())
+  title   String?
+  desc    String
+  hours   Int
+  per     Periodicity?  @relation(fields: [perCode], references: [id]) //Adds periodicity code to maintenance table as foreign key
+  perCode String?
+
+}
